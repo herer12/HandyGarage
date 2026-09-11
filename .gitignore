@@ -1,0 +1,221 @@
+# =====================================================
+# BUILD-OUTPUTS
+# =====================================================
+
+# PlatformIO
+.pio/
+
+# ESP-IDF / CMake / Ninja
+build/
+**/build/
+cmake-build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+# Compiled files
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.elf
+*.bin
+*.hex
+*.map
+*.eep
+*.uf2
+
+# Dependency files
+*.d
+*.su
+
+# =====================================================
+# ESP-IDF GENERATED FILES
+# =====================================================
+
+# ESP-IDF configuration
+sdkconfig
+sdkconfig.old
+sdkconfig.*.old
+
+# Ausnahme: Beispielkonfiguration versionieren
+!sdkconfig.defaults
+!sdkconfig.defaults.*
+
+# ESP-IDF managed components
+managed_components/
+
+# ESP-IDF dependencies / generated files
+dependencies.lock
+
+# Falls du diese bewusst versionieren möchtest,
+# kannst du die folgenden Regeln entfernen:
+# managed_components/
+# dependencies.lock
+
+# =====================================================
+# PLATFORMIO
+# =====================================================
+
+# PlatformIO environments
+.pio/
+
+# PlatformIO generated libraries
+.pio/libdeps/
+
+# PlatformIO test outputs
+.pio/test/
+
+# PlatformIO IDE metadata
+.platformio/
+
+# =====================================================
+# VS CODE
+# =====================================================
+
+.vscode/
+
+# Ausnahme: Wichtige PlatformIO-Konfiguration behalten
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# =====================================================
+# CLION / JETBRAINS
+# =====================================================
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# CLion generated files
+cmake-build-*/
+.cxx/
+
+# =====================================================
+# VISUAL STUDIO
+# =====================================================
+
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# =====================================================
+# ECLIPSE
+# =====================================================
+
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+.sts4-cache
+
+# =====================================================
+# CODE::BLOCKS / OTHER IDEs
+# =====================================================
+
+*.cbp
+*.layout
+*.depend
+
+# =====================================================
+# DEBUG / LOGS / TEMPORÄRE DATEIEN
+# =====================================================
+
+*.log
+*.tmp
+*.temp
+*.cache
+*.bak
+*.swp
+*.swo
+*~
+*.pid
+
+# GDB history
+.gdb_history
+
+# =====================================================
+# BETRIEBSSYSTEM
+# =====================================================
+
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# =====================================================
+# LOKALE DATEN / DATENBANKEN
+# =====================================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# =====================================================
+# KONFIGURATION / GEHEIME DATEN
+# =====================================================
+
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Lokale Konfigurationen
+config.local.*
+*.secret
+*.secrets
+
+# =====================================================
+# TESTS / COVERAGE
+# =====================================================
+
+coverage/
+.coverage/
+*.gcda
+*.gcno
+*.gcov
+Testing/
+CTestTestfile.cmake
+CTestCostData.txt
+Testing.xml
+
+# =====================================================
+# FLASH / FIRMWARE BACKUPS
+# =====================================================
+
+# Lokale Backups und Dumps
+*.flash
+*.dump
+*.bin.bak
+
+# =====================================================
+# SONSTIGES
+# =====================================================
+
+*.orig
+*.rej
