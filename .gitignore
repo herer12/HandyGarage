@@ -190,6 +190,8 @@ config.local.*
 *.secret
 *.secrets
 
+./Software/Dev Clion/include/Zugang.h"
+
 # =====================================================
 # TESTS / COVERAGE
 # =====================================================

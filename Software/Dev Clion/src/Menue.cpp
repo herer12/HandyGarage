@@ -3,6 +3,7 @@
 #include <string.h>
 
 namespace {
+// Nur Schriften mit Latin-1 ("_tf"), damit ae/oe/ue-Umlaute gehen.
 const uint8_t *const FONT_GROSS = u8g2_font_helvB14_tf;
 const uint8_t *const FONT_TITEL = u8g2_font_helvB08_tf;
 const uint8_t *const FONT_TEXT  = u8g2_font_6x12_tf;
@@ -13,13 +14,37 @@ constexpr int ZEILE_H          = 13;
 constexpr int LISTE_Y          = 12;
 
 constexpr int KNOPF_Y = 50, KNOPF_W = 62, KNOPF_H = 14;
+
+// Eigener I2C-Callback fuer U8g2 auf Wire1.
+// Der eingebaute (u8x8_byte_arduino_2nd_hw_i2c) ruft bei INIT Wire1.begin() OHNE Pins auf und
+// kann den Bus damit auf falsche Pins zuruecksetzen -> Display wird erkannt, bleibt aber dunkel.
+// Hier wird Wire1 nur benutzt, nicht neu gestartet (das macht Menue::starten() mit den Pins aus Konfig).
+extern "C" uint8_t menueByteWire1(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr) {
+  switch (msg) {
+    case U8X8_MSG_BYTE_SEND:
+      Wire1.write(static_cast<const uint8_t *>(arg_ptr), arg_int);
+      break;
+    case U8X8_MSG_BYTE_INIT:
+    case U8X8_MSG_BYTE_SET_DC:
+      break;
+    case U8X8_MSG_BYTE_START_TRANSFER:
+      Wire1.beginTransmission(u8x8_GetI2CAddress(u8x8) >> 1);
+      break;
+    case U8X8_MSG_BYTE_END_TRANSFER:
+      Wire1.endTransmission();
+      break;
+    default:
+      return 0;
+  }
+  return 1;
+}
 }  // namespace
 
 // ---------------------------------------------------------------------------------
 //  Start
 // ---------------------------------------------------------------------------------
 Menue::Menue(Belegungserkennung &belegung)
-    : _belegung(belegung), _u8g2(U8G2_R0, U8X8_PIN_NONE) {}
+    : _belegung(belegung) {}
 
 bool Menue::starten() {
   _re.starten(Konfig::PIN_RE_A, Konfig::PIN_RE_B, Konfig::PIN_RE_TASTER);
@@ -27,28 +52,19 @@ bool Menue::starten() {
   Wire1.begin(Konfig::PIN_OLED_SDA, Konfig::PIN_OLED_SCL, Konfig::OLED_TAKT_HZ);
   Wire1.setTimeOut(Konfig::I2C_TIMEOUT_MS);
 
-  delay(100);                                   // OLED braucht nach dem Einschalten etwas Zeit
-  for (int i = 0; i < 5 && !_displayDa; ++i) {
-    Wire1.beginTransmission(Konfig::OLED_ADRESSE);
-    _displayDa = (Wire1.endTransmission() == 0);
-    if (!_displayDa) delay(50);
-  }
-  Serial.printf("Display: %s\n", _displayDa ? "gefunden" : "NICHT gefunden");
-  if (!_displayDa){
-    Serial.println("Display fehlt");
-    return false;
-  }
+  // Display da? Ein fehlendes Display darf das System nicht blockieren.
+  Wire1.beginTransmission(Konfig::OLED_ADRESSE);
+  _displayDa = (Wire1.endTransmission() == 0);
+  if (!_displayDa) return false;
 
-  _u8g2.setI2CAddress(Konfig::OLED_ADRESSE << 1);
-  _u8g2.begin();
-
-  // U8g2 startet Wire1 intern ohne Pins -> Bus wieder auf unsere Pins legen
-  Wire1.end();
-  Wire1.begin(Konfig::PIN_OLED_SDA, Konfig::PIN_OLED_SCL, Konfig::OLED_TAKT_HZ);
-  Wire1.setTimeOut(Konfig::I2C_TIMEOUT_MS);
-
-  _u8g2.setBusClock(Konfig::OLED_TAKT_HZ);
-  _u8g2.setPowerSave(0);
+  u8g2_Setup_ssd1306_i2c_128x64_noname_f(_u8g2.getU8g2(), U8G2_R0, menueByteWire1,
+                                         u8x8_gpio_and_delay_arduino);
+  u8x8_SetPin_HW_I2C(_u8g2.getU8x8(), U8X8_PIN_NONE);   // kein Reset-Pin (sonst wuerde GPIO 0 geschaltet)
+  _u8g2.setI2CAddress(Konfig::OLED_ADRESSE << 1);      // U8g2 erwartet die 8-Bit-Adresse
+  _u8g2.initDisplay();
+  _u8g2.clearDisplay();
+  _u8g2.setPowerSave(0);                               // Display einschalten
+  _u8g2.setContrast(255);
 
   _startZeit_ms = millis();
   _ansicht = Ansicht::START;
@@ -95,7 +111,6 @@ void Menue::aktualisieren() {
     // Eingaben ignorieren; wechseln, sobald der Start fertig ist (und der Schirm lesbar war)
     if (_startFertig && (jetzt - _startZeit_ms) >= Konfig::START_MINDESTZEIT_MS) {
       _ansicht = Ansicht::HAUPTMENUE;
-      Serial.println("Wechsel: Start -> Hauptmenue");
       _neuZeichnen = true;
     }
   } else {

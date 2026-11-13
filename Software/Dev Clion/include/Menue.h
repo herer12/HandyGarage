@@ -75,7 +75,7 @@ class Menue {
   static const char *statusText(Zustand z);
 
   Belegungserkennung &_belegung;
-  U8G2_SSD1306_128X64_NONAME_F_2ND_HW_I2C _u8g2;     // 2ND = Wire1
+  U8G2                _u8g2;                 // SSD1306 128x64, Aufbau in starten() (eigener Wire1-Callback)
   Drehgeber           _re;
   AbmeldenCallback    _abmelden;
 
